@@ -401,12 +401,6 @@
             box-shadow: 0 15px 40px rgba(255, 58, 58, 0.4);
         }
 
-        .related-image.active {
-            transform: scale(1.2);
-            box-shadow: 0 15px 40px rgba(255, 58, 58, 0.6);
-            z-index: 15;
-        }
-
         .close-related {
             position: absolute;
             top: 2rem;
@@ -489,11 +483,10 @@
             color: #ff3a3a;
         }
 
-        /* Related Images Container for Mobile */
-        .related-images-mobile {
+        /* Related Images Below Main Image for Mobile */
+        .related-images-below {
             display: none;
             position: absolute;
-            bottom: 0;
             left: 0;
             width: 100%;
             padding: 1rem;
@@ -501,17 +494,15 @@
             pointer-events: none;
         }
 
-        .related-images-mobile-container {
+        .related-images-below-container {
             display: flex;
             justify-content: center;
             gap: 0.5rem;
             flex-wrap: wrap;
-            max-height: 30vh;
-            overflow-y: auto;
             pointer-events: auto;
         }
 
-        .related-image-mobile {
+        .related-image-below {
             width: 80px;
             height: 80px;
             border-radius: 6px;
@@ -529,12 +520,12 @@
             background-repeat: no-repeat;
         }
 
-        .related-image-mobile:hover {
+        .related-image-below:hover {
             transform: scale(1.1);
             box-shadow: 0 8px 20px rgba(255, 58, 58, 0.4);
         }
 
-        .related-image-mobile.active {
+        .related-image-below.active {
             transform: scale(1.15);
             box-shadow: 0 8px 20px rgba(255, 58, 58, 0.6);
         }
@@ -679,13 +670,23 @@
                 display: none;
             }
             
-            .related-images-mobile {
+            .related-images-below {
                 display: block;
+                top: calc(100% + 20px);
             }
             
             .zoomed-image-container {
                 width: 95vmin;
                 height: 95vmin;
+            }
+            
+            .related-view {
+                align-items: flex-start;
+                padding-top: 100px;
+            }
+            
+            .instructions {
+                bottom: 140px;
             }
         }
 
@@ -708,7 +709,7 @@
                 height: 95vmin;
             }
             
-            .related-image-mobile {
+            .related-image-below {
                 width: 70px;
                 height: 70px;
             }
@@ -716,6 +717,10 @@
             .zoomed-image-container {
                 width: 100%;
                 height: 70vmin;
+            }
+            
+            .related-view {
+                padding-top: 80px;
             }
         }
     </style>
@@ -778,9 +783,9 @@
             <div class="related-images-container" id="relatedImagesContainer">
                 <!-- Related images will be inserted by JavaScript -->
             </div>
-            <div class="related-images-mobile" id="relatedImagesMobile">
-                <div class="related-images-mobile-container" id="relatedImagesMobileContainer">
-                    <!-- Related images for mobile will be inserted by JavaScript -->
+            <div class="related-images-below" id="relatedImagesBelow">
+                <div class="related-images-below-container" id="relatedImagesBelowContainer">
+                    <!-- Related images below main image for mobile will be inserted by JavaScript -->
                 </div>
             </div>
         </div>
@@ -985,18 +990,13 @@
         const relatedView = document.getElementById('relatedView');
         const mainImage = document.getElementById('mainImage');
         const relatedImagesContainer = document.getElementById('relatedImagesContainer');
-        const relatedImagesMobileContainer = document.getElementById('relatedImagesMobileContainer');
+        const relatedImagesBelowContainer = document.getElementById('relatedImagesBelowContainer');
         const closeRelated = document.getElementById('closeRelated');
         const backToTopBtn = document.getElementById('back-to-top');
         const header = document.querySelector('header');
         const zoomedView = document.getElementById('zoomedView');
         const zoomedImage = document.getElementById('zoomedImage');
         const closeZoomed = document.getElementById('closeZoomed');
-
-        // متغيرات لتتبع الحالة الحالية
-        let currentRelatedImage = null;
-        let currentRelatedImages = [];
-        let currentLetter = '';
 
         // Function to build main image URL from Picture folder
         function getMainImageUrl(letter) {
@@ -1115,9 +1115,6 @@
 
         // Open related images view
         function openRelatedView(image) {
-            currentLetter = image.letter;
-            currentRelatedImages = [];
-            
             // Hide all gallery items except the clicked one
             document.querySelectorAll('.gallery-item').forEach(item => {
                 if (item.dataset.letter !== image.letter) {
@@ -1130,21 +1127,10 @@
             // Set main image
             mainImage.src = getMainImageUrl(image.letter);
             mainImage.alt = image.title;
-            currentRelatedImage = getMainImageUrl(image.letter);
             
             // Clear previous related images
             relatedImagesContainer.innerHTML = '';
-            relatedImagesMobileContainer.innerHTML = '';
-            
-            // Clear current related images array
-            currentRelatedImages = [];
-            
-            // Add main image to related images array
-            currentRelatedImages.push({
-                url: getMainImageUrl(image.letter),
-                title: image.title,
-                isMain: true
-            });
+            relatedImagesBelowContainer.innerHTML = '';
             
             // Calculate circle positions for desktop
             const radius = Math.min(window.innerWidth, window.innerHeight) * 0.25;
@@ -1159,13 +1145,6 @@
                 const y = centerY + radius * Math.sin(angle) - 90;
                 
                 const relatedImageUrl = getRelatedImageUrl(image.letter, i);
-                
-                // Add to current related images array
-                currentRelatedImages.push({
-                    url: relatedImageUrl,
-                    title: `${image.title} - Related ${i}`,
-                    isMain: false
-                });
                 
                 // Create desktop version
                 const imgElement = document.createElement('div');
@@ -1201,29 +1180,29 @@
                     imgElement.style.transform = 'scale(1)';
                 }, 100 * i);
                 
-                // Create mobile version
-                const mobileImgElement = document.createElement('div');
-                mobileImgElement.className = 'related-image-mobile';
-                mobileImgElement.dataset.index = i;
-                mobileImgElement.innerHTML = `${image.letter}${i}`;
+                // Create mobile version (below main image)
+                const belowImgElement = document.createElement('div');
+                belowImgElement.className = 'related-image-below';
+                belowImgElement.dataset.index = i;
+                belowImgElement.innerHTML = `${image.letter}${i}`;
                 
                 // Try to load related image from Related folder for mobile
                 checkImageExists(relatedImageUrl, (exists) => {
                     if (exists) {
-                        mobileImgElement.style.backgroundImage = `url(${relatedImageUrl})`;
-                        mobileImgElement.innerHTML = '';
+                        belowImgElement.style.backgroundImage = `url(${relatedImageUrl})`;
+                        belowImgElement.innerHTML = '';
                     } else {
-                        mobileImgElement.innerHTML = `${image.letter}${i}`;
+                        belowImgElement.innerHTML = `${image.letter}${i}`;
                     }
                 });
                 
                 // Add click event to open zoomed view
-                mobileImgElement.addEventListener('click', (e) => {
+                belowImgElement.addEventListener('click', (e) => {
                     e.stopPropagation();
                     openZoomedView(relatedImageUrl, `${image.title} - Related ${i}`);
                 });
                 
-                relatedImagesMobileContainer.appendChild(mobileImgElement);
+                relatedImagesBelowContainer.appendChild(belowImgElement);
             }
             
             // Add click event to main image to open zoomed view
@@ -1286,7 +1265,7 @@
                 
                 // Clear related images
                 relatedImagesContainer.innerHTML = '';
-                relatedImagesMobileContainer.innerHTML = '';
+                relatedImagesBelowContainer.innerHTML = '';
             }, 300);
         }
 
