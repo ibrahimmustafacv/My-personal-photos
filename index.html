@@ -312,6 +312,97 @@
             font-size: 0.9rem;
         }
 
+        /* Videos Section */
+        #videos {
+            padding: 5rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        #videos.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .videos-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .video-wrapper {
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            background-color: #1a1a1f;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transition: transform 0.5s ease, box-shadow 0.5s ease;
+        }
+
+        .video-wrapper:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(255, 58, 58, 0.2);
+        }
+
+        .portfolio-video {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .video-info {
+            padding: 1.5rem;
+        }
+
+        .video-title {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: #fff;
+        }
+
+        .video-description {
+            color: #aaa;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .video-controls {
+            display: flex;
+            justify-content: center;
+            padding: 1rem;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 0 0 12px 12px;
+        }
+
+        .video-btn {
+            background-color: #ff3a3a;
+            color: white;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            margin: 0 0.5rem;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .video-btn:hover {
+            background-color: #ff5252;
+            transform: scale(1.05);
+        }
+
+        .video-btn i {
+            font-size: 1.1rem;
+        }
+
         /* Related Images View */
         .related-view {
             position: fixed;
@@ -617,6 +708,20 @@
             font-size: 0.9rem;
         }
 
+        /* Video Loading Fallback */
+        .video-fallback {
+            width: 100%;
+            height: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(45deg, #1a1a1f, #2a2a2f);
+            color: #666;
+            font-size: 0.9rem;
+            border-radius: 12px 12px 0 0;
+        }
+
         /* Error Message */
         .error-message {
             text-align: center;
@@ -629,6 +734,11 @@
         @media (max-width: 1024px) {
             .name {
                 font-size: 4rem;
+            }
+            
+            .videos-container {
+                grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+                gap: 1.5rem;
             }
         }
 
@@ -648,6 +758,11 @@
             
             .gallery-grid {
                 grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+            
+            .videos-container {
+                grid-template-columns: 1fr;
+                gap: 2rem;
             }
             
             .main-image-container {
@@ -677,7 +792,7 @@
         }
 
         @media (max-width: 480px) {
-            #hero, #gallery, footer {
+            #hero, #gallery, #videos, footer {
                 padding-left: 1rem;
                 padding-right: 1rem;
             }
@@ -688,6 +803,14 @@
             
             .gallery-grid {
                 grid-template-columns: 1fr;
+            }
+            
+            .videos-container {
+                gap: 1.5rem;
+            }
+            
+            .video-wrapper {
+                margin-bottom: 1rem;
             }
             
             .main-image-container {
@@ -729,6 +852,7 @@
             <ul>
                 <li><a href="#hero">Home</a></li>
                 <li><a href="#gallery">Gallery</a></li>
+                <li><a href="#videos">Videos</a></li>
                 <li><a href="#contact">Contact</a></li>
             </ul>
         </nav>
@@ -756,6 +880,58 @@
         </div>
         <div class="gallery-grid" id="galleryGrid">
             <!-- Gallery items will be inserted by JavaScript -->
+        </div>
+    </section>
+
+    <!-- Videos Section -->
+    <section id="videos">
+        <h2 class="section-title">CINEMATIC VIDEOS</h2>
+        <div class="videos-container">
+            <div class="video-wrapper">
+                <div class="video-fallback" id="videoAFallback">
+                    <div>Video A.mp4 loading...</div>
+                    <div style="font-size:0.8rem; margin-top:10px;">Place video at: One break/A.mp4</div>
+                </div>
+                <video class="portfolio-video" id="videoA" style="display:none;" preload="metadata">
+                    <source src="One break/A.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+                <div class="video-info">
+                    <h3 class="video-title">The Urban Symphony</h3>
+                    <p class="video-description">A cinematic exploration of city life, where architecture meets humanity in a dance of light and shadow. Filmed over three weeks across multiple urban landscapes.</p>
+                </div>
+                <div class="video-controls">
+                    <button class="video-btn" id="playVideoA">
+                        <i class="fas fa-play"></i> Play
+                    </button>
+                    <button class="video-btn" id="pauseVideoA">
+                        <i class="fas fa-pause"></i> Pause
+                    </button>
+                </div>
+            </div>
+            
+            <div class="video-wrapper">
+                <div class="video-fallback" id="videoBFallback">
+                    <div>Video B.mp4 loading...</div>
+                    <div style="font-size:0.8rem; margin-top:10px;">Place video at: One break/B.mp4</div>
+                </div>
+                <video class="portfolio-video" id="videoB" style="display:none;" preload="metadata">
+                    <source src="One break/B.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+                <div class="video-info">
+                    <h3 class="video-title">Nature's Rhythms</h3>
+                    <p class="video-description">An immersive journey through untouched landscapes, capturing the silent poetry of nature. From mountain peaks to forest floors, witness Earth's majestic beauty.</p>
+                </div>
+                <div class="video-controls">
+                    <button class="video-btn" id="playVideoB">
+                        <i class="fas fa-play"></i> Play
+                    </button>
+                    <button class="video-btn" id="pauseVideoB">
+                        <i class="fas fa-pause"></i> Pause
+                    </button>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -982,6 +1158,17 @@
         const zoomedView = document.getElementById('zoomedView');
         const zoomedImage = document.getElementById('zoomedImage');
         const closeZoomed = document.getElementById('closeZoomed');
+        
+        // Video elements
+        const videoA = document.getElementById('videoA');
+        const videoB = document.getElementById('videoB');
+        const videoAFallback = document.getElementById('videoAFallback');
+        const videoBFallback = document.getElementById('videoBFallback');
+        const playVideoABtn = document.getElementById('playVideoA');
+        const pauseVideoABtn = document.getElementById('pauseVideoA');
+        const playVideoBBtn = document.getElementById('playVideoB');
+        const pauseVideoBBtn = document.getElementById('pauseVideoB');
+        const videosSection = document.getElementById('videos');
 
         // Function to build main image URL from Picture folder
         function getMainImageUrl(letter) {
@@ -1001,6 +1188,14 @@
             img.src = url;
         }
 
+        // Function to check if video exists
+        function checkVideoExists(url, callback) {
+            const video = document.createElement('video');
+            video.addEventListener('canplay', () => callback(true));
+            video.addEventListener('error', () => callback(false));
+            video.src = url;
+        }
+
         // Initialize the website
         document.addEventListener('DOMContentLoaded', () => {
             // Hide loader after 1.5 seconds
@@ -1011,6 +1206,9 @@
 
             // Load gallery (alphabetically from A to Z)
             loadGallery();
+            
+            // Load videos
+            loadVideos();
             
             // Set up scroll animations
             setupScrollAnimations();
@@ -1026,6 +1224,9 @@
             
             // Close zoomed view when clicking on image
             zoomedImage.addEventListener('click', closeZoomedView);
+            
+            // Set up video controls
+            setupVideoControls();
         });
 
         // Load gallery images
@@ -1095,6 +1296,59 @@
                 galleryItem.addEventListener('click', () => openRelatedView(image));
                 
                 galleryGrid.appendChild(galleryItem);
+            });
+        }
+
+        // Load videos
+        function loadVideos() {
+            // Check if video A exists
+            checkVideoExists('One break/A.mp4', (exists) => {
+                if (exists) {
+                    videoAFallback.style.display = 'none';
+                    videoA.style.display = 'block';
+                } else {
+                    console.warn('Video A.mp4 not found at: One break/A.mp4');
+                }
+            });
+            
+            // Check if video B exists
+            checkVideoExists('One break/B.mp4', (exists) => {
+                if (exists) {
+                    videoBFallback.style.display = 'none';
+                    videoB.style.display = 'block';
+                } else {
+                    console.warn('Video B.mp4 not found at: One break/B.mp4');
+                }
+            });
+        }
+
+        // Setup video controls
+        function setupVideoControls() {
+            // Video A controls
+            playVideoABtn.addEventListener('click', () => {
+                videoA.play();
+            });
+            
+            pauseVideoABtn.addEventListener('click', () => {
+                videoA.pause();
+            });
+            
+            // Video B controls
+            playVideoBBtn.addEventListener('click', () => {
+                videoB.play();
+            });
+            
+            pauseVideoBBtn.addEventListener('click', () => {
+                videoB.pause();
+            });
+            
+            // Pause videos when they end
+            videoA.addEventListener('ended', () => {
+                videoA.currentTime = 0;
+            });
+            
+            videoB.addEventListener('ended', () => {
+                videoB.currentTime = 0;
             });
         }
 
@@ -1254,12 +1508,16 @@
             }, 300);
         }
 
-        // Set up scroll animations for gallery items
+        // Set up scroll animations for gallery items and videos section
         function setupScrollAnimations() {
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
-                        entry.target.classList.add('visible');
+                        if (entry.target.classList.contains('gallery-item')) {
+                            entry.target.classList.add('visible');
+                        } else if (entry.target.id === 'videos') {
+                            entry.target.classList.add('visible');
+                        }
                     }
                 });
             }, { threshold: 0.1 });
@@ -1269,6 +1527,9 @@
                 document.querySelectorAll('.gallery-item').forEach(item => {
                     observer.observe(item);
                 });
+                
+                // Observe videos section
+                observer.observe(videosSection);
             }, 1000);
         }
 
@@ -1350,6 +1611,15 @@
                 img.onerror = () => console.log(`❌ Related/A/A${i}.jpg: NOT FOUND (${url})`);
                 img.src = url;
             }
+            
+            console.log('\nTesting video URLs:');
+            const videos = ['One break/A.mp4', 'One break/B.mp4'];
+            videos.forEach(videoUrl => {
+                const video = document.createElement('video');
+                video.addEventListener('canplay', () => console.log(`✅ ${videoUrl}: EXISTS`));
+                video.addEventListener('error', () => console.log(`❌ ${videoUrl}: NOT FOUND`));
+                video.src = videoUrl;
+            });
         };
     </script>
 </body>
