@@ -385,11 +385,26 @@
             transform: scale(0.5);
             transition: opacity 0.5s ease, transform 0.5s ease, box-shadow 0.3s ease;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            background-color: rgba(255, 58, 58, 0.1);
+            color: #aaa;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
         }
 
         .related-image:hover {
             transform: scale(1.1);
             box-shadow: 0 15px 40px rgba(255, 58, 58, 0.4);
+        }
+
+        .related-image.active {
+            transform: scale(1.2);
+            box-shadow: 0 15px 40px rgba(255, 58, 58, 0.6);
+            z-index: 15;
         }
 
         .close-related {
@@ -417,6 +432,111 @@
             color: #aaa;
             font-size: 0.9rem;
             letter-spacing: 1px;
+        }
+
+        /* Zoomed Image View */
+        .zoomed-view {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background-color: rgba(10, 10, 15, 0.98);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+            padding: 2rem;
+        }
+
+        .zoomed-view.active {
+            display: flex;
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .zoomed-image-container {
+            position: relative;
+            width: 90vmin;
+            height: 90vmin;
+            max-width: 800px;
+            max-height: 800px;
+        }
+
+        .zoomed-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+            cursor: pointer;
+            animation: zoomIn 0.8s ease forwards;
+        }
+
+        .close-zoomed {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 100;
+            transition: color 0.3s ease;
+        }
+
+        .close-zoomed:hover {
+            color: #ff3a3a;
+        }
+
+        /* Related Images Container for Mobile */
+        .related-images-mobile {
+            display: none;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 1rem;
+            z-index: 20;
+            pointer-events: none;
+        }
+
+        .related-images-mobile-container {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            max-height: 30vh;
+            overflow-y: auto;
+            pointer-events: auto;
+        }
+
+        .related-image-mobile {
+            width: 80px;
+            height: 80px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            background-color: rgba(255, 58, 58, 0.1);
+            color: #aaa;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .related-image-mobile:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(255, 58, 58, 0.4);
+        }
+
+        .related-image-mobile.active {
+            transform: scale(1.15);
+            box-shadow: 0 8px 20px rgba(255, 58, 58, 0.6);
         }
 
         /* Footer */
@@ -552,11 +672,20 @@
             .main-image-container {
                 width: 80vmin;
                 height: 80vmin;
+                margin-bottom: 120px;
             }
             
             .related-image {
-                width: 25vmin;
-                height: 25vmin;
+                display: none;
+            }
+            
+            .related-images-mobile {
+                display: block;
+            }
+            
+            .zoomed-image-container {
+                width: 95vmin;
+                height: 95vmin;
             }
         }
 
@@ -572,6 +701,21 @@
             
             .gallery-grid {
                 grid-template-columns: 1fr;
+            }
+            
+            .main-image-container {
+                width: 95vmin;
+                height: 95vmin;
+            }
+            
+            .related-image-mobile {
+                width: 70px;
+                height: 70px;
+            }
+            
+            .zoomed-image-container {
+                width: 100%;
+                height: 70vmin;
             }
         }
     </style>
@@ -634,8 +778,23 @@
             <div class="related-images-container" id="relatedImagesContainer">
                 <!-- Related images will be inserted by JavaScript -->
             </div>
+            <div class="related-images-mobile" id="relatedImagesMobile">
+                <div class="related-images-mobile-container" id="relatedImagesMobileContainer">
+                    <!-- Related images for mobile will be inserted by JavaScript -->
+                </div>
+            </div>
         </div>
         <div class="instructions">Click the main image or press ESC to return to gallery</div>
+    </div>
+
+    <!-- Zoomed Image View -->
+    <div class="zoomed-view" id="zoomedView">
+        <button class="close-zoomed" id="closeZoomed">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="zoomed-image-container">
+            <img id="zoomedImage" class="zoomed-image" src="" alt="">
+        </div>
     </div>
 
     <!-- Footer -->
@@ -826,9 +985,18 @@
         const relatedView = document.getElementById('relatedView');
         const mainImage = document.getElementById('mainImage');
         const relatedImagesContainer = document.getElementById('relatedImagesContainer');
+        const relatedImagesMobileContainer = document.getElementById('relatedImagesMobileContainer');
         const closeRelated = document.getElementById('closeRelated');
         const backToTopBtn = document.getElementById('back-to-top');
         const header = document.querySelector('header');
+        const zoomedView = document.getElementById('zoomedView');
+        const zoomedImage = document.getElementById('zoomedImage');
+        const closeZoomed = document.getElementById('closeZoomed');
+
+        // متغيرات لتتبع الحالة الحالية
+        let currentRelatedImage = null;
+        let currentRelatedImages = [];
+        let currentLetter = '';
 
         // Function to build main image URL from Picture folder
         function getMainImageUrl(letter) {
@@ -867,6 +1035,12 @@
             
             // Set up header scroll effect
             setupHeaderScroll();
+            
+            // Set up zoomed view close button
+            closeZoomed.addEventListener('click', closeZoomedView);
+            
+            // Close zoomed view when clicking on image
+            zoomedImage.addEventListener('click', closeZoomedView);
         });
 
         // Load gallery images
@@ -941,6 +1115,9 @@
 
         // Open related images view
         function openRelatedView(image) {
+            currentLetter = image.letter;
+            currentRelatedImages = [];
+            
             // Hide all gallery items except the clicked one
             document.querySelectorAll('.gallery-item').forEach(item => {
                 if (item.dataset.letter !== image.letter) {
@@ -953,45 +1130,66 @@
             // Set main image
             mainImage.src = getMainImageUrl(image.letter);
             mainImage.alt = image.title;
+            currentRelatedImage = getMainImageUrl(image.letter);
             
             // Clear previous related images
             relatedImagesContainer.innerHTML = '';
+            relatedImagesMobileContainer.innerHTML = '';
             
-            // Calculate circle positions
+            // Clear current related images array
+            currentRelatedImages = [];
+            
+            // Add main image to related images array
+            currentRelatedImages.push({
+                url: getMainImageUrl(image.letter),
+                title: image.title,
+                isMain: true
+            });
+            
+            // Calculate circle positions for desktop
             const radius = Math.min(window.innerWidth, window.innerHeight) * 0.25;
             const centerX = window.innerWidth / 2;
             const centerY = window.innerHeight / 2;
             const angleStep = (2 * Math.PI) / image.relatedCount;
             
-            // Add placeholders for related images
+            // Add placeholders for related images (desktop)
             for (let i = 1; i <= image.relatedCount; i++) {
                 const angle = (i - 1) * angleStep;
                 const x = centerX + radius * Math.cos(angle) - 90;
                 const y = centerY + radius * Math.sin(angle) - 90;
                 
+                const relatedImageUrl = getRelatedImageUrl(image.letter, i);
+                
+                // Add to current related images array
+                currentRelatedImages.push({
+                    url: relatedImageUrl,
+                    title: `${image.title} - Related ${i}`,
+                    isMain: false
+                });
+                
+                // Create desktop version
                 const imgElement = document.createElement('div');
                 imgElement.className = 'related-image';
+                imgElement.dataset.index = i;
                 imgElement.style.left = `${x}px`;
                 imgElement.style.top = `${y}px`;
                 imgElement.style.transitionDelay = `${0.1 * i}s`;
-                imgElement.style.display = 'flex';
-                imgElement.style.alignItems = 'center';
-                imgElement.style.justifyContent = 'center';
-                imgElement.style.backgroundColor = 'rgba(255, 58, 58, 0.1)';
-                imgElement.style.color = '#aaa';
-                imgElement.style.fontSize = '0.8rem';
                 imgElement.innerHTML = `${image.letter}${i}`;
                 
                 // Try to load related image from Related folder
-                const relatedImageUrl = getRelatedImageUrl(image.letter, i);
                 checkImageExists(relatedImageUrl, (exists) => {
                     if (exists) {
-                        imgElement.innerHTML = '';
                         imgElement.style.backgroundImage = `url(${relatedImageUrl})`;
-                        imgElement.style.backgroundSize = 'cover';
-                        imgElement.style.backgroundPosition = 'center';
+                        imgElement.innerHTML = '';
+                        
+                        // Add click event to open zoomed view
+                        imgElement.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            openZoomedView(relatedImageUrl, `${image.title} - Related ${i}`);
+                        });
                     } else {
                         console.warn(`Related image not found: ${relatedImageUrl}`);
+                        imgElement.innerHTML = `${image.letter}${i}`;
                     }
                 });
                 
@@ -1002,30 +1200,68 @@
                     imgElement.style.opacity = '1';
                     imgElement.style.transform = 'scale(1)';
                 }, 100 * i);
+                
+                // Create mobile version
+                const mobileImgElement = document.createElement('div');
+                mobileImgElement.className = 'related-image-mobile';
+                mobileImgElement.dataset.index = i;
+                mobileImgElement.innerHTML = `${image.letter}${i}`;
+                
+                // Try to load related image from Related folder for mobile
+                checkImageExists(relatedImageUrl, (exists) => {
+                    if (exists) {
+                        mobileImgElement.style.backgroundImage = `url(${relatedImageUrl})`;
+                        mobileImgElement.innerHTML = '';
+                    } else {
+                        mobileImgElement.innerHTML = `${image.letter}${i}`;
+                    }
+                });
+                
+                // Add click event to open zoomed view
+                mobileImgElement.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openZoomedView(relatedImageUrl, `${image.title} - Related ${i}`);
+                });
+                
+                relatedImagesMobileContainer.appendChild(mobileImgElement);
             }
+            
+            // Add click event to main image to open zoomed view
+            mainImage.onclick = () => {
+                openZoomedView(getMainImageUrl(image.letter), image.title);
+            };
             
             // Show related view
             relatedView.classList.add('active');
             document.body.style.overflow = 'hidden';
             
-            // Add event to close when clicking main image
-            mainImage.onclick = closeRelatedView;
-            
-            // Add scroll event to close on scroll
-            let scrollTimeout;
-            const handleScrollClose = () => {
-                if (!relatedView.classList.contains('active')) return;
-                
-                clearTimeout(scrollTimeout);
-                scrollTimeout = setTimeout(() => {
-                    closeRelatedView();
-                }, 100);
+            // Add event to close when pressing ESC
+            const handleKeyDown = (e) => {
+                if (e.key === 'Escape') {
+                    if (zoomedView.classList.contains('active')) {
+                        closeZoomedView();
+                    } else {
+                        closeRelatedView();
+                    }
+                }
             };
             
-            window.addEventListener('scroll', handleScrollClose);
+            document.addEventListener('keydown', handleKeyDown);
             
             // Store the event handler for removal
-            window.relatedViewScrollHandler = handleScrollClose;
+            window.relatedViewKeyHandler = handleKeyDown;
+        }
+
+        // Open zoomed image view
+        function openZoomedView(imageUrl, title) {
+            zoomedImage.src = imageUrl;
+            zoomedImage.alt = title;
+            zoomedView.classList.add('active');
+        }
+
+        // Close zoomed image view
+        function closeZoomedView() {
+            zoomedView.classList.remove('active');
         }
 
         // Close related images view
@@ -1034,10 +1270,10 @@
             relatedView.classList.remove('active');
             document.body.style.overflow = 'auto';
             
-            // Remove scroll event listener
-            if (window.relatedViewScrollHandler) {
-                window.removeEventListener('scroll', window.relatedViewScrollHandler);
-                window.relatedViewScrollHandler = null;
+            // Remove keydown event listener
+            if (window.relatedViewKeyHandler) {
+                document.removeEventListener('keydown', window.relatedViewKeyHandler);
+                window.relatedViewKeyHandler = null;
             }
             
             // Show all gallery items again
@@ -1050,6 +1286,7 @@
                 
                 // Clear related images
                 relatedImagesContainer.innerHTML = '';
+                relatedImagesMobileContainer.innerHTML = '';
             }, 300);
         }
 
@@ -1108,17 +1345,25 @@
         // Close related view with button
         closeRelated.addEventListener('click', closeRelatedView);
 
-        // Close related view with Escape key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && relatedView.classList.contains('active')) {
-                closeRelatedView();
-            }
-        });
+        // Close zoomed view with Escape key (handled in openRelatedView)
 
         // Handle window resize
         window.addEventListener('resize', () => {
             if (relatedView.classList.contains('active')) {
-                closeRelatedView();
+                // Recalculate positions for related images on desktop
+                const radius = Math.min(window.innerWidth, window.innerHeight) * 0.25;
+                const centerX = window.innerWidth / 2;
+                const centerY = window.innerHeight / 2;
+                const angleStep = (2 * Math.PI) / 4; // Assuming 4 related images
+                
+                document.querySelectorAll('.related-image').forEach((img, i) => {
+                    const angle = (i) * angleStep;
+                    const x = centerX + radius * Math.cos(angle) - 90;
+                    const y = centerY + radius * Math.sin(angle) - 90;
+                    
+                    img.style.left = `${x}px`;
+                    img.style.top = `${y}px`;
+                });
             }
         });
 
